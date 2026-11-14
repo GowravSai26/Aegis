@@ -10,7 +10,8 @@ services:
     branch: main
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
-    autoDeploy: true
+    # Render can't watch this repo; CI calls the deploy hook after checks pass.
+    autoDeployTrigger: "off"
     envVars:
       - key: GROQ_API_KEY
         sync: false
