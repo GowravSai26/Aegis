@@ -8,11 +8,17 @@ from agents.state import AegisState
 
 load_dotenv()
 
-llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    api_key=os.getenv("GROQ_API_KEY"),
-    temperature=0.2,
-)
+DEFAULT_MODEL = "openai/gpt-oss-120b"
+
+
+def _llm() -> ChatGroq:
+    # Built per call so the model can be swapped with the GROQ_MODEL env var.
+    return ChatGroq(
+        model=os.getenv("GROQ_MODEL", DEFAULT_MODEL),
+        api_key=os.getenv("GROQ_API_KEY"),
+        temperature=0.2,
+    )
+
 
 SYSTEM = """You are the Writer Agent for AEGIS, an autonomous chargeback defense system.
 Write a professional, legally formatted chargeback dispute response document.
@@ -89,7 +95,7 @@ Evidence collected:
 - Correspondence: {state.get("evidence_collected", {}).get("correspondence")}
 {feedback_section}
 """
-    response = llm.invoke([SystemMessage(content=SYSTEM), HumanMessage(content=prompt)])
+    response = _llm().invoke([SystemMessage(content=SYSTEM), HumanMessage(content=prompt)])
 
     trace = state.get("agent_trace", [])
     revision = state.get("revision_count", 0)

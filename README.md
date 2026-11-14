@@ -7,13 +7,15 @@
 [![Tests](https://img.shields.io/badge/Tests-7%2F7-10B981?style=flat)](/)
 [![Evals](https://img.shields.io/badge/Evals-15%2F15-10B981?style=flat)](/)
 [![CI](https://img.shields.io/badge/CI-Passing-10B981?style=flat)](/)
-[![Live](https://img.shields.io/badge/Live-Railway-7C5CBF?style=flat)](https://aegis-production-1d9a.up.railway.app)
+[![Live](https://img.shields.io/badge/Live-Demo-7C5CBF?style=flat)](https://aegis-zeta-ten.vercel.app)
 
 
 
-## 🔴 Live API
+## 🔴 Live Demo
 
-**[aegis.vercel.app](https://aegis-zeta-ten.vercel.app//)**
+**[aegis-zeta-ten.vercel.app](https://aegis-zeta-ten.vercel.app)** · API: [`aegis-api.onrender.com`](https://aegis-api.onrender.com/health)
+
+> Hosted on free tiers (Vercel + Render). The API sleeps after 15 minutes idle, so the first request can take up to ~1 minute while it wakes up — the page shows a status message while it does.
 
 ---
 
@@ -52,6 +54,8 @@ The Reviewer → Writer loop runs until the response passes review or hits the r
 ---
 
 ## Evaluation Results
+
+*Recorded with the original `llama-3.1-8b-instant` model, before Groq retired it; the agents now default to `openai/gpt-oss-120b`.*
 
 ```
 ============================================================
@@ -127,7 +131,7 @@ The Reviewer → Writer loop runs until the response passes review or hits the r
         │                                             │
 ┌───────▼──────────────┐              ┌───────────────▼──────────┐
 │  Reason Code         │              │        Groq LLM          │
-│  Rules Engine        │              │    (llama-instant)       │
+│  Rules Engine        │              │  (openai/gpt-oss-120b)   │
 │  data/               │              │    Agent reasoning       │
 │  reason_codes.json   │              │    + JSON output         │
 └──────────────────────┘              └──────────────────────────┘
@@ -142,6 +146,8 @@ The Reviewer → Writer loop runs until the response passes review or hits the r
 │   Full trace of every agent run — LLM calls, tool results,   │
 │   revision loops, token usage, latency per step              │
 └──────────────────────────────────────────────────────────────┘
+```
+
 ---
 
 ## API Reference
@@ -219,13 +225,13 @@ Health check.
 | Layer | Technology | Why |
 |---|---|---|
 | Agent framework | LangGraph | Explicit state machine — inspectable, debuggable, revision loops |
-| LLM | Groq (`llama-3.1-8b-instant`) | Fast inference, reliable JSON output |
+| LLM | Groq (`openai/gpt-oss-120b`, set via `GROQ_MODEL`) | Fast inference, reliable JSON output |
 | Backend | FastAPI + Pydantic v2 | Fully typed, async, automatic OpenAPI docs |
 | Document generation | python-docx | Submission-ready `.docx` output |
 | Rules engine | JSON reason code rules | Deterministic guardrail on top of LLM reasoning |
 | Observability | LangSmith | Full agent trace per dispute |
 | Containerization | Docker + docker-compose | One-command local setup |
-| Deployment | Railway | Zero-config hosting |
+| Deployment | Render (API, free web service via `render.yaml`) + Vercel (frontend) | Free hosting |
 | CI/CD | GitHub Actions | Lint → test → build on every push |
 | Code quality | ruff | Zero lint warnings enforced |
 
@@ -235,15 +241,16 @@ Health check.
 
 ```bash
 # 1. Clone
-git clone https://github.com/GowravSai26/aegis
-cd aegis
+git clone https://github.com/GowravSai26/Aegis
+cd Aegis
 
 # 2. Set environment variables
 cp .env.example .env
-# Add GROQ_API_KEY and LANGCHAIN_API_KEY
+# Add GROQ_API_KEY (LANGCHAIN_API_KEY is optional, for tracing)
 
-# 3. Start everything (API + Postgres + Redis)
+# 3. Start the API
 docker compose up --build
+# (compose also starts Postgres and Redis containers, which the code doesn't use yet)
 
 # 4. Test it
 curl -X POST http://localhost:8000/dispute \
@@ -266,7 +273,7 @@ curl -X POST http://localhost:8000/dispute \
 # Unit tests — mocked, no API calls needed
 pytest tests/unit/ -v
 
-# Eval harness — requires running API
+# Eval harness — requires the API running on localhost:8000
 python tests/evals/eval_scenarios.py
 ```
 
@@ -300,10 +307,11 @@ aegis/
 ├── tests/
 │   ├── unit/                        # Per-agent mocked unit tests (7 tests)
 │   └── evals/                       # 15-scenario end-to-end eval harness
-├── frontend/                        # UI (WIP)
+├── frontend/index.html              # Single-page UI (deployed on Vercel)
 ├── generated_docs/                  # Output .docx files
 ├── Dockerfile
 ├── docker-compose.yml
+├── render.yaml                      # Render Blueprint (free web service)
 └── .github/workflows/ci.yml
 ```
 
@@ -317,7 +325,7 @@ Every push to `main` triggers:
 2. **pytest** — 7 unit tests across all 5 agents
 3. **Docker build** — confirms image builds cleanly
 
-Railway auto-deploys on every successful push to `main`.
+Render redeploys the API and Vercel redeploys the frontend on every push to `main`.
 
 ---
 
@@ -326,7 +334,9 @@ Railway auto-deploys on every successful push to `main`.
 | Variable | Description |
 |---|---|
 | `GROQ_API_KEY` | Groq API key for LLM inference |
-| `LANGCHAIN_API_KEY` | LangSmith API key for tracing |
+| `GROQ_MODEL` | Groq model id (default `openai/gpt-oss-120b`) |
+| `CORS_ORIGINS` | Comma-separated browser origins allowed to call the API (default: the Vercel frontend) |
+| `LANGCHAIN_API_KEY` | LangSmith API key for tracing (optional) |
 | `LANGCHAIN_TRACING_V2` | Enable LangSmith tracing (`true` / `false`) |
 | `LANGCHAIN_PROJECT` | LangSmith project name |
 
@@ -346,12 +356,3 @@ Merchants face $125 billion in annual chargeback losses — attacked by fraudule
 Agentic AI Engineer · Gen AI
 
 [LinkedIn](https://www.linkedin.com/in/Gowrav-Sai-Veeramallu) · [GitHub](https://github.com/GowravSai26)
-```
-
----
-
-```bash
-git add README.md
-git commit -m "docs: full README with architecture, evals, and mythology"
-git push
-```

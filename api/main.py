@@ -1,3 +1,5 @@
+import os
+
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,7 +12,10 @@ app = FastAPI(title="AEGIS", description="Autonomous Chargeback Defense System",
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://aegis-zeta-ten.vercel.app"],
+    # Comma-separated list; defaults to the Vercel frontend.
+    allow_origins=[
+        o.strip() for o in os.getenv("CORS_ORIGINS", "https://aegis-zeta-ten.vercel.app").split(",") if o.strip()
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
