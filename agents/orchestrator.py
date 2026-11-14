@@ -7,6 +7,8 @@ from agents.state import AegisState, DisputeVerdict
 from agents.strategy_agent import run_strategy_agent
 from agents.writer_agent import run_writer_agent
 
+MAX_REVISIONS = 2
+
 
 def escalate_node(state: AegisState) -> AegisState:
     trace = state.get("agent_trace", [])
@@ -30,10 +32,10 @@ def route_after_strategy(state: AegisState) -> str:
 def route_after_review(state: AegisState) -> str:
     if state.get("review_passed"):
         return "end"
-    if state.get("revision_count", 0) >= 2:
+    # The reviewer bumps revision_count on every failed review (routers can't
+    # update state). Three failed drafts → hand the case to a human.
+    if state.get("revision_count", 0) > MAX_REVISIONS:
         return "escalate"
-    # increment revision count and send back
-    state["revision_count"] = state.get("revision_count", 0) + 1
     return "writer"
 
 

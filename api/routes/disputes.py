@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
@@ -41,8 +42,10 @@ def _build_state(req: DisputeRequest) -> AegisState:
     )
 
 
+# Plain `def`: FastAPI runs it in a worker thread, so the slow, blocking LLM pipeline
+# doesn't freeze the event loop (and /health keeps answering while a dispute runs).
 @router.post("/dispute", response_model=DisputeResponse)
-async def run_dispute(req: DisputeRequest):
+def run_dispute(req: DisputeRequest):
     try:
         state = _build_state(req)
         result = aegis_graph.invoke(state)
@@ -71,6 +74,8 @@ async def run_dispute(req: DisputeRequest):
 
 @router.get("/dispute/{chargeback_id}/download")
 async def download_document(chargeback_id: str):
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", chargeback_id):
+        raise HTTPException(status_code=400, detail="Invalid chargeback_id")
     path = Path(f"generated_docs/{chargeback_id}.docx")
     if not path.exists():
         raise HTTPException(status_code=404, detail="Document not found")

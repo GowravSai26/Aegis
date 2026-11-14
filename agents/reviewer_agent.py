@@ -72,6 +72,7 @@ Revision number: {state.get("revision_count", 0)}
 
     return {
         **state,
+        "revision_count": state.get("revision_count", 0) + (0 if passed else 1),
         "review_passed": passed,
         "review_feedback": parsed.get("feedback", ""),
         "agent_trace": trace,
