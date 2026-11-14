@@ -4,119 +4,134 @@
     "status": "PASS",
     "expected": "FIGHT",
     "got": "FIGHT",
-    "winability": 0.85,
-    "review_passed": true
+    "winability": 0.92,
+    "review_passed": true,
+    "latency_s": 7.8
   },
   {
     "id": "EVAL-002",
     "status": "PASS",
     "expected": "FIGHT",
     "got": "FIGHT",
-    "winability": 0.85,
-    "review_passed": true
+    "winability": 0.92,
+    "review_passed": true,
+    "latency_s": 6.7
   },
   {
     "id": "EVAL-003",
     "status": "PASS",
     "expected": "ANY",
-    "got": "FIGHT",
-    "winability": 0.75,
-    "review_passed": true
+    "got": "ACCEPT",
+    "winability": 0.22,
+    "review_passed": null,
+    "latency_s": 3.2
   },
   {
     "id": "EVAL-004",
     "status": "PASS",
     "expected": "FIGHT",
     "got": "FIGHT",
-    "winability": 0.8,
-    "review_passed": true
+    "winability": 0.78,
+    "review_passed": true,
+    "latency_s": 6.5
   },
   {
     "id": "EVAL-005",
     "status": "PASS",
     "expected": "FIGHT",
     "got": "FIGHT",
-    "winability": 0.85,
-    "review_passed": true
+    "winability": 0.92,
+    "review_passed": true,
+    "latency_s": 12.7
   },
   {
     "id": "EVAL-006",
     "status": "PASS",
     "expected": "FIGHT",
     "got": "FIGHT",
-    "winability": 0.8,
-    "review_passed": true
+    "winability": 0.78,
+    "review_passed": true,
+    "latency_s": 21.4
   },
   {
     "id": "EVAL-007",
     "status": "PASS",
     "expected": "FIGHT",
     "got": "FIGHT",
-    "winability": 0.75,
-    "review_passed": true
+    "winability": 0.66,
+    "review_passed": true,
+    "latency_s": 21.4
   },
   {
     "id": "EVAL-008",
     "status": "PASS",
     "expected": "ANY",
     "got": "FIGHT",
-    "winability": 0.7,
-    "review_passed": true
+    "winability": 0.71,
+    "review_passed": true,
+    "latency_s": 13.4
   },
   {
     "id": "EVAL-009",
     "status": "PASS",
     "expected": "ANY",
-    "got": "FIGHT",
-    "winability": 0.7,
-    "review_passed": true
+    "got": "ACCEPT",
+    "winability": 0.22,
+    "review_passed": null,
+    "latency_s": 3.5
   },
   {
     "id": "EVAL-010",
     "status": "PASS",
     "expected": "ANY",
-    "got": "FIGHT",
-    "winability": 0.0,
-    "review_passed": true
+    "got": "ACCEPT",
+    "winability": 0.35,
+    "review_passed": null,
+    "latency_s": 3.1
   },
   {
     "id": "EVAL-011",
     "status": "PASS",
     "expected": "ESCALATE",
     "got": "ESCALATE",
-    "winability": 0.0,
-    "review_passed": null
+    "winability": 0.45,
+    "review_passed": null,
+    "latency_s": 4.2
   },
   {
     "id": "EVAL-012",
     "status": "PASS",
     "expected": "ANY",
     "got": "FIGHT",
-    "winability": 0.8,
-    "review_passed": true
+    "winability": 0.73,
+    "review_passed": true,
+    "latency_s": 9.3
   },
   {
     "id": "EVAL-013",
     "status": "PASS",
     "expected": "ANY",
-    "got": "FIGHT",
-    "winability": 0.75,
-    "review_passed": true
+    "got": "ACCEPT",
+    "winability": 0.27,
+    "review_passed": null,
+    "latency_s": 4.6
   },
   {
     "id": "EVAL-014",
     "status": "PASS",
     "expected": "FIGHT",
     "got": "FIGHT",
-    "winability": 0.85,
-    "review_passed": true
+    "winability": 0.86,
+    "review_passed": true,
+    "latency_s": 7.1
   },
   {
     "id": "EVAL-015",
     "status": "PASS",
     "expected": "FIGHT",
     "got": "FIGHT",
-    "winability": 0.8,
-    "review_passed": true
+    "winability": 0.78,
+    "review_passed": true,
+    "latency_s": 10.2
   }
 ]

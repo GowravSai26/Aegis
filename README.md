@@ -2,11 +2,9 @@
 
 > *Named after the aegis — the divine shield of Zeus and Athena in Greek mythology. Unbreakable. Carried into every battle.*
 
-**Chargebacks cost merchants $125 billion annually. Responding to each one requires a paralegal-level understanding of card network rules, evidence law, and dispute strategy — taking hours per case. AEGIS replicates that entire defense workflow autonomously — classifying the dispute, gathering evidence, building a legal strategy, drafting a formal response, and reviewing it — producing a submission-ready `.docx` document with a **verdict (FIGHT / ACCEPT / ESCALATE), winability score, and full argument set** in under 10 seconds.**
+**Chargebacks cost merchants $125 billion annually. Responding to each one requires a paralegal-level understanding of card network rules, evidence law, and dispute strategy — taking hours per case. AEGIS replicates that entire defense workflow autonomously — classifying the dispute, gathering evidence, building a legal strategy, drafting a formal response, and reviewing it — producing a submission-ready `.docx` document with a **verdict (FIGHT / ACCEPT / ESCALATE), winability score, and full argument set** in about 10 seconds.**
 
-[![Tests](https://img.shields.io/badge/Tests-7%2F7-10B981?style=flat)](/)
-[![Evals](https://img.shields.io/badge/Evals-15%2F15-10B981?style=flat)](/)
-[![CI](https://img.shields.io/badge/CI-Passing-10B981?style=flat)](/)
+[![CI](https://github.com/GowravSai26/Aegis/actions/workflows/ci.yml/badge.svg)](https://github.com/GowravSai26/Aegis/actions/workflows/ci.yml)
 [![Live](https://img.shields.io/badge/Live-Demo-7C5CBF?style=flat)](https://aegis-zeta-ten.vercel.app)
 
 
@@ -49,52 +47,35 @@ Intake → Evidence Collector → Strategy → Writer → Reviewer
 | **Writer** | Drafts a formal, submission-ready dispute response document |
 | **Reviewer** | Reviews the draft for completeness and triggers a revision loop if needed |
 
-The Reviewer → Writer loop runs until the response passes review or hits the revision limit — the same way a human paralegal would iterate on a draft.
+The Reviewer → Writer loop runs until the response passes review; after three rejected drafts the case is escalated to a human — the same way a paralegal would iterate on a draft. ACCEPT and ESCALATE verdicts skip the writer entirely.
 
 ---
 
 ## Evaluation Results
 
-*Recorded with the original `llama-3.1-8b-instant` model, before Groq retired it; the agents now default to `openai/gpt-oss-120b`.*
+15 scenarios across all 8 supported reason codes, run against the **live API** (Render free tier, Groq `openai/gpt-oss-120b`) on 2026-11-14. Raw output: [`tests/evals/eval_results.json`](tests/evals/eval_results.json).
 
 ```
-============================================================
-  AEGIS EVAL HARNESS — 15 Scenarios
-============================================================
-  EVAL-001  13.1 · $250  · Item not received
-            ✅ expected=FIGHT     got=FIGHT     win=0.85  review=True
-  EVAL-002  13.1 · $450  · Item not received
-            ✅ expected=FIGHT     got=FIGHT     win=0.85  review=True
-  EVAL-003  13.3 · $99   · Item not as described
-            ✅ expected=ANY       got=FIGHT     win=0.75  review=True
-  EVAL-004  10.4 · $175  · Fraudulent transaction
-            ✅ expected=FIGHT     got=FIGHT     win=0.80  review=True
-  EVAL-005  13.1 · $320  · Package not delivered
-            ✅ expected=FIGHT     got=FIGHT     win=0.85  review=True
-  EVAL-006  10.4 · $540  · Fraud claim
-            ✅ expected=FIGHT     got=FIGHT     win=0.80  review=True
-  EVAL-007  12.6 · $89   · Duplicate processing
-            ✅ expected=FIGHT     got=FIGHT     win=0.75  review=True
-  EVAL-008  13.7 · $1200 · Cancelled merchandise
-            ✅ expected=ANY       got=ACCEPT    win=0.33  review=None
-  EVAL-009  13.2 · $850  · Cancelled recurring
-            ✅ expected=ANY       got=FIGHT     win=0.70  review=True
-  EVAL-010  13.6 · $2200 · Credit not processed
-            ✅ expected=ANY       got=FIGHT     win=0.80  review=True
-  EVAL-011  10.5 · $5000 · Visa fraud monitoring
-            ✅ expected=ESCALATE  got=ESCALATE  win=0.00  review=None
-  EVAL-012  10.4 · $7500 · High value fraud
-            ✅ expected=ANY       got=FIGHT     win=0.80  review=True
-  EVAL-013  13.3 · $130  · Wrong item shipped
-            ✅ expected=ANY       got=FIGHT     win=0.75  review=True
-  EVAL-014  13.1 · $420  · Delayed delivery claim
-            ✅ expected=FIGHT     got=FIGHT     win=0.85  review=True
-  EVAL-015  10.4 · $670  · No authorization claim
-            ✅ expected=FIGHT     got=FIGHT     win=0.80  review=True
-============================================================
-  15/15 passed — EVAL PASSED
-============================================================
+EVAL-001  13.1  $250   expected=FIGHT     got=FIGHT     win=0.92   7.8s
+EVAL-002  13.1  $450   expected=FIGHT     got=FIGHT     win=0.92   6.7s
+EVAL-003  13.3  $99    expected=ANY       got=ACCEPT    win=0.22   3.2s
+EVAL-004  10.4  $175   expected=FIGHT     got=FIGHT     win=0.78   6.5s
+EVAL-005  13.1  $320   expected=FIGHT     got=FIGHT     win=0.92  12.7s
+EVAL-006  10.4  $540   expected=FIGHT     got=FIGHT     win=0.78  21.4s
+EVAL-007  12.6  $89    expected=FIGHT     got=FIGHT     win=0.66  21.4s
+EVAL-008  13.7  $1200  expected=ANY       got=FIGHT     win=0.71  13.4s
+EVAL-009  13.2  $850   expected=ANY       got=ACCEPT    win=0.22   3.5s
+EVAL-010  13.6  $2200  expected=ANY       got=ACCEPT    win=0.35   3.1s
+EVAL-011  10.5  $5000  expected=ESCALATE  got=ESCALATE  win=0.45   4.2s
+EVAL-012  10.4  $7500  expected=ANY       got=FIGHT     win=0.73   9.3s
+EVAL-013  13.3  $130   expected=ANY       got=ACCEPT    win=0.27   4.6s
+EVAL-014  13.1  $420   expected=FIGHT     got=FIGHT     win=0.86   7.1s
+EVAL-015  10.4  $670   expected=FIGHT     got=FIGHT     win=0.78  10.2s
+
+15/15 passed · median 7.1s · slowest 21.4s
 ```
+
+**What this does and doesn't show:** 9 scenarios have an expected verdict (8 FIGHT, 1 ESCALATE) and all 9 matched. The other 6 are marked `ANY` and only check that the pipeline returns a valid verdict without errors. Because the evidence tools return fixed sample data (see [Limitations](#limitations)), the verdicts mostly reflect the reason code and amount, not real case evidence. Latency includes Groq free-tier rate limiting; run with `EVAL_PAUSE_S=20` to stay under it.
 
 ---
 
@@ -109,7 +90,7 @@ The Reviewer → Writer loop runs until the response passes review or hits the r
 ┌──────────────────────────────▼───────────────────────────────┐
 │                   FastAPI (api/main.py)                      │
 │              Pydantic schema validation                      │
-│              Request routing + error handling                │
+│      Route runs the graph, then writes the .docx             │
 └──────────────────────────────┬───────────────────────────────┘
                                │
 ┌──────────────────────────────▼───────────────────────────────┐
@@ -122,8 +103,9 @@ The Reviewer → Writer loop runs until the response passes review or hits the r
 │     → writer_agent  ←───────────────────────────┐            │
 │     → reviewer_agent                            │            │
 │          │ review_passed?                       │            │
-│          ├── YES → document_generator → END     │            │
-│          └── NO  → (revision loop) ─────────────┘            │
+│          ├── YES → END                          │            │
+│          ├── NO, < 3 drafts → (revision) ───────┘            │
+│          └── NO, 3 drafts   → escalate → END                 │
 │                                                              │
 └──────────────────────────────┬───────────────────────────────┘
                                │
@@ -229,10 +211,10 @@ Health check.
 | Backend | FastAPI + Pydantic v2 | Fully typed, async, automatic OpenAPI docs |
 | Document generation | python-docx | Submission-ready `.docx` output |
 | Rules engine | JSON reason code rules | Deterministic guardrail on top of LLM reasoning |
-| Observability | LangSmith | Full agent trace per dispute |
+| Observability | LangSmith (optional, off on the live demo) | Full agent trace per dispute |
 | Containerization | Docker + docker-compose | One-command local setup |
 | Deployment | Render (API, free web service via `render.yaml`) + Vercel (frontend) | Free hosting |
-| CI/CD | GitHub Actions | Lint → test → build on every push |
+| CI/CD | GitHub Actions | Lint → test → build on every push; deploy on `main` |
 | Code quality | ruff | Zero lint warnings enforced |
 
 ---
@@ -250,7 +232,6 @@ cp .env.example .env
 
 # 3. Start the API
 docker compose up --build
-# (compose also starts Postgres and Redis containers, which the code doesn't use yet)
 
 # 4. Test it
 curl -X POST http://localhost:8000/dispute \
@@ -270,11 +251,12 @@ curl -X POST http://localhost:8000/dispute \
 ## Running Tests
 
 ```bash
-# Unit tests — mocked, no API calls needed
+# Unit tests — LLM calls are mocked, no API key needed
 pytest tests/unit/ -v
 
-# Eval harness — requires the API running on localhost:8000
+# Eval harness — needs a running API (localhost:8000 by default)
 python tests/evals/eval_scenarios.py
+AEGIS_API_URL=https://aegis-api-qs66.onrender.com EVAL_PAUSE_S=20 python tests/evals/eval_scenarios.py
 ```
 
 ---
@@ -305,7 +287,7 @@ aegis/
 ├── data/
 │   └── reason_codes.json            # 8 Visa reason codes with evidence requirements
 ├── tests/
-│   ├── unit/                        # Per-agent mocked unit tests (7 tests)
+│   ├── unit/                        # Mocked unit tests: each agent + the full graph (8 tests)
 │   └── evals/                       # 15-scenario end-to-end eval harness
 ├── frontend/index.html              # Single-page UI (deployed on Vercel)
 ├── generated_docs/                  # Output .docx files
@@ -322,11 +304,24 @@ aegis/
 Every push to `main` triggers:
 
 1. **Ruff** — lint + format check
-2. **pytest** — 7 unit tests across all 5 agents
+2. **pytest** — 8 unit tests (all 5 agents + the revision loop)
 3. **Docker build** — confirms image builds cleanly
 4. **Deploy** — on `main`, calls Render's deploy hook (`RENDER_DEPLOY_HOOK` secret) to redeploy the API
 
 Vercel redeploys the frontend on every push to `main`.
+
+---
+
+## Limitations
+
+This is a portfolio project, not a production system. Known gaps:
+
+- **Evidence is sample data.** The five evidence tools in `tools/` return fixed, strong-looking records (delivered, signed, 3-DS authenticated) for every transaction instead of querying a real order, carrier or payment system. The pipeline and prompts are real; the inputs are not.
+- **No persistence.** Disputes aren't stored. Generated `.docx` files live on the server's disk, which Render wipes on every restart or redeploy, so download a document right after generating it.
+- **No authentication or rate limiting** on the API; anyone with the URL can run disputes against the Groq quota.
+- **LLM output isn't guaranteed.** Agents parse JSON from the model; on a parse error they fall back to safe defaults (e.g. strategy → ESCALATE) rather than failing.
+- **Reason-code rules cover 8 Visa codes** only; other networks (Mastercard, RuPay) aren't modeled.
+- **Free hosting:** cold starts take up to ~1 minute, and Groq's free tier rate-limits back-to-back requests.
 
 ---
 
