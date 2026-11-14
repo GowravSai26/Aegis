@@ -13,7 +13,7 @@
 
 ## 🔴 Live Demo
 
-**[aegis-zeta-ten.vercel.app](https://aegis-zeta-ten.vercel.app)** · API: [`aegis-api.onrender.com`](https://aegis-api.onrender.com/health)
+**[aegis-zeta-ten.vercel.app](https://aegis-zeta-ten.vercel.app)** · API: [`aegis-api-qs66.onrender.com`](https://aegis-api-qs66.onrender.com/health)
 
 > Hosted on free tiers (Vercel + Render). The API sleeps after 15 minutes idle, so the first request can take up to ~1 minute while it wakes up — the page shows a status message while it does.
 
