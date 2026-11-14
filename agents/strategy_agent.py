@@ -10,11 +10,17 @@ from tools.reason_code_rules import get_winability_factors
 
 load_dotenv()
 
-llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    api_key=os.getenv("GROQ_API_KEY"),
-    temperature=0,
-)
+DEFAULT_MODEL = "openai/gpt-oss-120b"
+
+
+def _llm() -> ChatGroq:
+    # Built per call so the model can be swapped with the GROQ_MODEL env var.
+    return ChatGroq(
+        model=os.getenv("GROQ_MODEL", DEFAULT_MODEL),
+        api_key=os.getenv("GROQ_API_KEY"),
+        temperature=0,
+    )
+
 
 SYSTEM = """You are the Strategy Agent for AEGIS, an autonomous chargeback defense system.
 Analyze the evidence and decide whether the merchant should fight or accept the chargeback.
@@ -56,7 +62,7 @@ Evidence collected:
 
 Make your FIGHT / ACCEPT / ESCALATE decision.
 """
-    response = llm.invoke([SystemMessage(content=SYSTEM), HumanMessage(content=prompt)])
+    response = _llm().invoke([SystemMessage(content=SYSTEM), HumanMessage(content=prompt)])
 
     try:
         parsed = _parse(response.content)

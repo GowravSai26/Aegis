@@ -10,11 +10,17 @@ from tools.reason_code_rules import get_reason_code, get_required_evidence
 
 load_dotenv()
 
-llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    api_key=os.getenv("GROQ_API_KEY"),
-    temperature=0,
-)
+DEFAULT_MODEL = "openai/gpt-oss-120b"
+
+
+def _llm() -> ChatGroq:
+    # Built per call so the model can be swapped with the GROQ_MODEL env var.
+    return ChatGroq(
+        model=os.getenv("GROQ_MODEL", DEFAULT_MODEL),
+        api_key=os.getenv("GROQ_API_KEY"),
+        temperature=0,
+    )
+
 
 SYSTEM = """You are the Intake Agent for AEGIS, an autonomous chargeback defense system.
 Given a chargeback notification, you must return ONLY a JSON object with these fields:
@@ -33,7 +39,7 @@ Reason Description: {state["reason_description"]}
 Amount: ${state["amount"]}
 Deadline: {state["dispute_deadline"]}
 """
-    response = llm.invoke([SystemMessage(content=SYSTEM), HumanMessage(content=prompt)])
+    response = _llm().invoke([SystemMessage(content=SYSTEM), HumanMessage(content=prompt)])
 
     try:
         raw = response.content.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()

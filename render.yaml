@@ -1,0 +1,24 @@
+# Render Blueprint: New → Blueprint → pick this repo.
+# Free web service built from the Dockerfile. It sleeps after 15 min idle;
+# the first request wakes it (up to ~1 min).
+services:
+  - type: web
+    name: aegis-api
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: CORS_ORIGINS
+        value: https://aegis-zeta-ten.vercel.app
+      - key: LANGCHAIN_TRACING_V2
+        value: "false"  # set to true and add LANGCHAIN_API_KEY to enable LangSmith
+      - key: LANGCHAIN_PROJECT
+        value: aegis

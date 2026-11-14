@@ -445,6 +445,15 @@ textarea{resize:vertical;min-height:70px;line-height:1.55;padding-top:10px}
 
 .hidden{display:none!important}
 
+/* ── WAKE-UP BANNER (free hosting sleeps when idle) ── */
+.wake{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  max-width:calc(100vw - 32px);text-align:center;
+  background:var(--toast-bg);color:var(--toast-fg);
+  padding:10px 22px;font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;
+  z-index:9998;animation:up .2s ease;
+}
+
 @media(max-width:900px){
   .hero{grid-template-columns:1fr}
   .hero-geo{display:none}
@@ -475,7 +484,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.55;padding-top:10px}
     <a href="#">Settings</a>
   </nav>
   <div class="bar-right">
-    <span><span class="dot-live"></span>All systems live</span>
+    <span><span class="dot-live"></span><span id="apiStatus" style="border:0;padding:0">Connecting…</span></span>
     <span>API v1.0</span>
     <!-- THEME TOGGLE -->
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">
@@ -688,8 +697,11 @@ textarea{resize:vertical;min-height:70px;line-height:1.55;padding-top:10px}
   </div>
 </div>
 
+<div class="wake hidden" id="wakeBanner">Waking up the server (free hosting, up to ~1 min)…</div>
+
 <script>
-const API='https://aegis-production-1d9a.up.railway.app';
+// Backend API (Render free tier — sleeps after 15 min idle, first request wakes it).
+const API_BASE='https://aegis-api.onrender.com';
 let currentId=null;
 const $=id=>document.getElementById(id);
 
@@ -777,8 +789,9 @@ async function submitDispute(){
   resetPipeline();showState('stateLoading');
   const pipeP=animatePipeline();
   try{
-    const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),20000);
-    const res=await fetch(`${API}/dispute`,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,
+    await serverReady;
+    const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),120000);
+    const res=await fetch(`${API_BASE}/dispute`,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,
       body:JSON.stringify({chargeback_id:data.dispute_id,merchant_id:'MERCH-001',transaction_id:'TXN-001',amount:data.amount,reason_code:data.reason_code,reason_description:data.reason_code,merchant:data.merchant||undefined,txn_date:data.txn_date||undefined,cardholder:data.cardholder||undefined,notes:data.notes||undefined})});
     clearTimeout(t);
     if(!res.ok){let m=`Server error ${res.status}`;try{const e=await res.json();m=e.detail||m}catch{const tx=await res.text();if(tx)m=tx}throw new Error(m)}
@@ -799,7 +812,7 @@ async function downloadDoc(id){
   if(btn){btn.textContent='Downloading…';btn.disabled=true}
   try{
     const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),15000);
-    const res=await fetch(`${API}/dispute/${id}/download`,{signal:ctrl.signal});clearTimeout(t);
+    const res=await fetch(`${API_BASE}/dispute/${id}/download`,{signal:ctrl.signal});clearTimeout(t);
     if(!res.ok){const tx=await res.text();throw new Error(`Download failed (${res.status}): ${tx}`)}
     const ct=res.headers.get('content-type')||'';
     if(!ct.includes('application'))throw new Error('Invalid file type received');
@@ -824,6 +837,24 @@ function toast(msg){
   const el=document.createElement('div');el.className='toast';el.textContent=msg;
   document.body.appendChild(el);setTimeout(()=>el.remove(),3000);
 }
+
+/* ── WAKE THE SERVER ON PAGE LOAD ── */
+async function pingHealth(){
+  const banner=$('wakeBanner'),status=$('apiStatus');
+  const slow=setTimeout(()=>{banner.classList.remove('hidden');status.textContent='Waking up server…'},1500);
+  const started=Date.now();
+  while(Date.now()-started<120000){
+    try{
+      const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),30000);
+      const res=await fetch(`${API_BASE}/health`,{signal:ctrl.signal});clearTimeout(t);
+      if(res.ok){clearTimeout(slow);banner.classList.add('hidden');status.textContent='All systems live';return true}
+    }catch(e){}
+    await delay(3000);
+  }
+  clearTimeout(slow);banner.textContent='Server did not respond. Please refresh in a minute.';status.textContent='API offline';
+  return false;
+}
+const serverReady=pingHealth();
 
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')submitDispute()});
 </script>

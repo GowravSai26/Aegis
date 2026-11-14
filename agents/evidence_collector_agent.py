@@ -14,11 +14,17 @@ from tools.order_lookup import get_order
 
 load_dotenv()
 
-llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    api_key=os.getenv("GROQ_API_KEY"),
-    temperature=0,
-)
+DEFAULT_MODEL = "openai/gpt-oss-120b"
+
+
+def _llm() -> ChatGroq:
+    # Built per call so the model can be swapped with the GROQ_MODEL env var.
+    return ChatGroq(
+        model=os.getenv("GROQ_MODEL", DEFAULT_MODEL),
+        api_key=os.getenv("GROQ_API_KEY"),
+        temperature=0,
+    )
+
 
 SYSTEM = """You are the Evidence Collector Agent for AEGIS.
 Given collected evidence and required evidence list, return ONLY a JSON object:
@@ -64,7 +70,7 @@ Collected evidence:
 
 Assess how well the collected evidence covers the required evidence.
 """
-    response = llm.invoke([SystemMessage(content=SYSTEM), HumanMessage(content=prompt)])
+    response = _llm().invoke([SystemMessage(content=SYSTEM), HumanMessage(content=prompt)])
 
     try:
         raw = response.content.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
