@@ -324,8 +324,9 @@ Every push to `main` triggers:
 1. **Ruff** — lint + format check
 2. **pytest** — 7 unit tests across all 5 agents
 3. **Docker build** — confirms image builds cleanly
+4. **Deploy** — on `main`, calls Render's deploy hook (`RENDER_DEPLOY_HOOK` secret) to redeploy the API
 
-Render redeploys the API and Vercel redeploys the frontend on every push to `main`.
+Vercel redeploys the frontend on every push to `main`.
 
 ---
 
