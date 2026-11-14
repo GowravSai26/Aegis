@@ -5,7 +5,8 @@ from pydantic import BaseModel, Field
 
 
 class DisputeRequest(BaseModel):
-    chargeback_id: str
+    # Used as the .docx filename, so restrict it to safe characters.
+    chargeback_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,64}$")
     merchant_id: str
     transaction_id: str
     amount: float

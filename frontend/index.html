@@ -750,6 +750,7 @@ function collectForm(){
 }
 function validate(d){
   if(!d.dispute_id)return'Please enter a Dispute ID.';
+  if(!/^[A-Za-z0-9_-]{1,64}$/.test(d.dispute_id))return'Dispute ID can only use letters, numbers, - and _.';
   if(!d.reason_code)return'Please select a Reason Code.';
   if(!d.amount||d.amount<=0)return'Please enter a valid amount.';
   return null;

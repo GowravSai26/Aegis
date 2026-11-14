@@ -1,15 +1,19 @@
 """
 AEGIS Eval Harness — 15 dispute scenarios
 Run with: python tests/evals/eval_scenarios.py
+Point it at another server with AEGIS_API_URL, e.g. the live Render API.
 """
 
 import json
+import os
 import sys
 import time
 
 import httpx
 
-API_URL = "http://localhost:8000/dispute"
+API_URL = os.getenv("AEGIS_API_URL", "http://localhost:8000").rstrip("/") + "/dispute"
+# Seconds to wait between scenarios; raise it to stay under Groq free-tier rate limits.
+PAUSE_S = float(os.getenv("EVAL_PAUSE_S", "2"))
 
 SCENARIOS = [
     {
@@ -167,11 +171,13 @@ def run_evals():
         expected = s["expected_verdict"]
 
         try:
-            resp = httpx.post(API_URL, json=payload, timeout=60)
+            started = time.perf_counter()
+            resp = httpx.post(API_URL, json=payload, timeout=180)
             resp.raise_for_status()
             data = resp.json()
+            latency = time.perf_counter() - started
 
-            time.sleep(2)
+            time.sleep(PAUSE_S)
 
             verdict = data.get("verdict", "").upper()
             winability = data.get("winability_score", 0)
@@ -198,12 +204,13 @@ def run_evals():
                     "got": verdict,
                     "winability": winability,
                     "review_passed": review,
+                    "latency_s": round(latency, 1),
                 }
             )
 
             icon = "✅" if status == "PASS" else ("⚠️" if status == "ERROR" else "❌")
             print(
-                f"{icon}  {s['chargeback_id']} | expected={expected or 'ANY':<8} got={verdict:<8} win={winability:.2f} review={review}"
+                f"{icon}  {s['chargeback_id']} | expected={expected or 'ANY':<8} got={verdict:<8} win={winability:.2f} review={review} {latency:.1f}s"
             )
 
         except Exception as e:
